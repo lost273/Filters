@@ -1,6 +1,7 @@
 ﻿using Filters.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -8,6 +9,7 @@ using System.Web.Mvc;
 namespace Filters.Controllers
 {
     public class HomeController : Controller {
+        private Stopwatch timer;
         [Authorize(Users = "adam, steve,jacqui", Roles ="admin")]
         public string Index() {
             return "This is the Index action on the Home controller";
@@ -20,6 +22,20 @@ namespace Filters.Controllers
             else {
                 throw new ArgumentOutOfRangeException("id");
             }
+        }
+        [ProfileAction]
+        [ProfileResult]
+        [ProfileAll]
+        public string FilterTest () {
+            return "This is the ActionFilterTest action";
+        }
+        protected override void OnActionExecuting (ActionExecutingContext filterContext) {
+            timer = Stopwatch.StartNew();
+        }
+        protected override void OnResultExecuted (ResultExecutedContext filterContext) {
+            timer.Stop();
+            filterContext.HttpContext.Response.Write(
+                string.Format("<div>Total elapsed time: {0}</div>", timer.Elapsed.TotalSeconds));
         }
     }
 }
